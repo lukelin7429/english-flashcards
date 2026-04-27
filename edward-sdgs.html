@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDGs 英語單字練習 · 大城國小 · Edward Huang</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #2E7D32;
+  --primary-light: #4CAF50;
+  --primary-dark: #1B5E20;
+  --accent: #FF8F00;
+  --bg: #F1F8E9;
+  --surface: #FFFFFF;
+  --text: #1A2E1A;
+  --muted: #5D7A5D;
+  --border: #C8E6C9;
+  --again: #EF4444;
+  --hard: #F97316;
+  --good: #22C55E;
+  --easy: #3B82F6;
+  --r: 16px;
+  --shadow: 0 8px 32px rgba(46,125,50,0.13);
+}
+body {
+  font-family: 'PingFang TC','Apple LiGothic Medium','Microsoft JhengHei',-apple-system,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, var(--primary-dark), #388E3C);
+  color: white;
+  padding: 0;
+  text-align: center;
+}
+.header-inner {
+  padding: 1.5rem 1rem 1.25rem;
+}
+.sdg-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  margin-bottom: 0.6rem;
+}
+.header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.02em; }
+.header .sub { font-size: 0.8rem; opacity: 0.85; margin-top: 0.25rem; }
+.stats-bar { display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; }
+.stat { display: flex; flex-direction: column; align-items: center; }
+.stat .val { font-size: 1.3rem; font-weight: 700; line-height: 1; }
+.stat .lbl { font-size: 0.68rem; opacity: 0.75; margin-top: 0.2rem; }
+
+/* ── Teacher Card ── */
+.teacher-card {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.teacher-photo {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--primary-light);
+  flex-shrink: 0;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: var(--muted);
+  overflow: hidden;
+}
+.teacher-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.teacher-info { flex: 1; min-width: 0; }
+.teacher-name { font-size: 1.05rem; font-weight: 700; color: var(--primary-dark); }
+.teacher-name span { font-size: 0.8rem; color: var(--muted); font-weight: 400; margin-left: 0.4rem; }
+.teacher-meta { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.6; }
+.teacher-meta b { color: var(--text); }
+
+/* ── SDG Colors Bar ── */
+.sdg-bar {
+  display: flex;
+  height: 5px;
+  overflow: hidden;
+}
+.sdg-bar span {
+  flex: 1;
+}
+
+/* ── Mode toggle ── */
+.mode-wrap { padding: 1rem 1rem 0; max-width: 500px; margin: 0 auto; }
+.mode-toggle { display: flex; background: var(--border); border-radius: 50px; padding: 3px; }
+.mode-btn {
+  flex: 1; padding: 0.55rem 0.5rem; border: none; background: transparent;
+  border-radius: 50px; font-size: 0.88rem; font-family: inherit; cursor: pointer;
+  color: var(--muted); font-weight: 500; transition: all 0.2s;
+}
+.mode-btn.active { background: var(--surface); color: var(--primary); box-shadow: 0 2px 8px rgba(46,125,50,0.18); }
+
+/* ── Content ── */
+.content { max-width: 500px; margin: 0 auto; padding: 1rem 1rem 2.5rem; }
+
+/* ── Filter / Progress ── */
+.filter-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; font-size: 0.8rem; color: var(--muted); }
+.toggle { position: relative; width: 36px; height: 20px; margin-left: auto; flex-shrink: 0; }
+.toggle input { display: none; }
+.toggle .sl { position: absolute; inset: 0; background: var(--border); border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+.toggle .sl::before { content: ''; position: absolute; width: 14px; height: 14px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.toggle input:checked + .sl { background: var(--primary); }
+.toggle input:checked + .sl::before { transform: translateX(16px); }
+.progress-wrap { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.1rem; }
+.progress-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-light), var(--primary)); border-radius: 3px; transition: width 0.4s ease; width: 0; }
+.progress-text { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+/* ── Card ── */
+.card-scene { perspective: 1000px; margin-bottom: 1.1rem; cursor: pointer; user-select: none; }
+.card { width: 100%; min-height: 270px; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+.card.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute; width: 100%; min-height: 270px;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2rem 1.5rem; text-align: center;
+}
+.card-back { transform: rotateY(180deg); }
+.card-hint { font-size: 0.7rem; color: var(--muted); margin-bottom: 1rem; }
+.card-word { font-size: 2rem; font-weight: 800; color: var(--primary-dark); letter-spacing: -0.01em; }
+.card-pos { font-size: 0.75rem; color: var(--accent); font-weight: 600; margin-top: 0.4rem; background: #FFF8E1; padding: 0.15rem 0.5rem; border-radius: 20px; }
+.card-zh { font-size: 1.5rem; font-weight: 700; color: var(--primary-dark); }
+.card-word-b { font-size: 1rem; color: var(--muted); margin-top: 0.3rem; }
+.card-ex { font-size: 0.88rem; color: var(--text); margin-top: 1rem; font-style: italic; line-height: 1.5; }
+.card-ex-zh { font-size: 0.82rem; color: var(--muted); margin-top: 0.35rem; line-height: 1.5; }
+.card-sdg { font-size: 0.68rem; color: var(--primary); margin-top: 1rem; opacity: 0.7; }
+
+/* ── Rating Buttons ── */
+.rating-btns {
+  display: none; grid-template-columns: repeat(4,1fr); gap: 0.5rem; margin-bottom: 1rem;
+}
+.r-btn {
+  border: none; border-radius: 10px; padding: 0.6rem 0.25rem; font-family: inherit;
+  font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
+}
+.r-btn .d { font-size: 0.62rem; font-weight: 400; opacity: 0.85; }
+.r-btn.again { background: #FEE2E2; color: #B91C1C; }
+.r-btn.hard  { background: #FFEDD5; color: #C2410C; }
+.r-btn.good  { background: #DCFCE7; color: #15803D; }
+.r-btn.easy  { background: #DBEAFE; color: #1D4ED8; }
+.r-btn:hover { filter: brightness(0.95); transform: translateY(-1px); }
+
+/* ── Nav buttons ── */
+.nav-btns { display: flex; gap: 0.75rem; margin-bottom: 1rem; }
+.nav-btn {
+  flex: 1; padding: 0.75rem; border: 1.5px solid var(--border); background: var(--surface);
+  border-radius: 10px; font-family: inherit; font-size: 0.88rem; cursor: pointer;
+  color: var(--muted); transition: all 0.15s; font-weight: 500;
+}
+.nav-btn.primary {
+  background: var(--primary); color: white; border-color: var(--primary);
+}
+.nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+.nav-btn.primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); color: white; }
+
+/* ── Quiz ── */
+.qz-card {
+  background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow);
+  padding: 1.75rem 1.5rem; margin-bottom: 1rem;
+}
+.q-zh { font-size: 1.6rem; font-weight: 700; color: var(--primary-dark); text-align: center; margin-bottom: 0.5rem; }
+.q-ex { font-size: 0.85rem; color: var(--muted); font-style: italic; text-align: center; margin-bottom: 1.25rem; line-height: 1.5; }
+.q-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.q-opt {
+  padding: 0.75rem 0.5rem; border: 1.5px solid var(--border); background: var(--surface);
+  border-radius: 10px; font-family: inherit; font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; color: var(--text); text-align: center;
+}
+.q-opt:hover:not(:disabled) { border-color: var(--primary); background: #F1F8E9; }
+.q-opt.correct { background: #DCFCE7; border-color: #16A34A; color: #15803D; }
+.q-opt.wrong   { background: #FEE2E2; border-color: #DC2626; color: #B91C1C; }
+.result-banner {
+  display: none; text-align: center; padding: 0.65rem 1rem; border-radius: 10px;
+  font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem;
+}
+.result-banner.show { display: block; }
+.rb-ok { background: #DCFCE7; color: #15803D; }
+.rb-ng { background: #FEE2E2; color: #B91C1C; }
+.next-btn {
+  display: none; width: 100%; padding: 0.8rem; background: var(--primary); color: white;
+  border: none; border-radius: 10px; font-family: inherit; font-size: 0.95rem;
+  font-weight: 700; cursor: pointer; transition: background 0.15s;
+}
+.next-btn.show { display: block; }
+.next-btn:hover { background: var(--primary-dark); }
+
+/* ── Done ── */
+.done-card {
+  display: none; background: var(--surface); border-radius: var(--r);
+  box-shadow: var(--shadow); padding: 2.5rem 1.5rem; text-align: center;
+}
+.done-card.show { display: block; }
+.done-emoji { font-size: 3rem; margin-bottom: 0.75rem; }
+.done-title { font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); }
+.done-score { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin: 0.5rem 0; }
+.done-msg { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+.done-again { margin-top: 1.25rem; }
+
+/* ── SDG Tag ── */
+.sdg-tag {
+  display: inline-block; font-size: 0.65rem; font-weight: 700;
+  padding: 0.1rem 0.45rem; border-radius: 20px; margin: 0.1rem;
+  color: white;
+}
+
+/* ── Footer ── */
+.footer-reset {
+  text-align: center; margin-top: 1.5rem;
+}
+.reset-btn {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: inherit; font-size: 0.75rem; padding: 0.4rem 1rem;
+  border-radius: 20px; cursor: pointer;
+}
+.reset-btn:hover { border-color: var(--again); color: var(--again); }
+</style>
+</head>
+<body>
+
+<!-- SDG Rainbow Bar -->
+<div class="sdg-bar">
+  <span style="background:#E5243B"></span><span style="background:#DDA63A"></span>
+  <span style="background:#4C9F38"></span><span style="background:#C5192D"></span>
+  <span style="background:#FF3A21"></span><span style="background:#26BDE2"></span>
+  <span style="background:#FCC30B"></span><span style="background:#A21942"></span>
+  <span style="background:#FD6925"></span><span style="background:#DD1367"></span>
+  <span style="background:#FD9D24"></span><span style="background:#BF8B2E"></span>
+  <span style="background:#3F7E44"></span><span style="background:#0A97D9"></span>
+  <span style="background:#56C02B"></span><span style="background:#00689D"></span>
+  <span style="background:#19486A"></span>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-inner">
+    <div class="sdg-badge">🌍 UN SDGs · 聯合國永續發展目標</div>
+    <h1>SDGs 英語單字練習</h1>
+    <div class="sub">大城國小 · 114 下學期</div>
+    <div class="stats-bar">
+      <div class="stat"><span class="val" id="sTot">–</span><span class="lbl">單字總數</span></div>
+      <div class="stat"><span class="val" id="sDue">–</span><span class="lbl">今日待複習</span></div>
+      <div class="stat"><span class="val" id="sMas">–</span><span class="lbl">已掌握</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Teacher Card -->
+<div class="teacher-card">
+  <div class="teacher-photo" id="teacherPhotoWrap">
+    <span id="teacherPhotoEmoji" style="display:none;">👨‍🏫</span>
+    <img id="teacherPhotoImg" src="edward-huang.jpg" alt="Edward Huang" onload="this.style.display='block';document.getElementById('teacherPhotoEmoji').style.display='none';" onerror="this.style.display='none';document.getElementById('teacherPhotoEmoji').style.display='block';">
+  </div>
+  <div class="teacher-info">
+    <div class="teacher-name">Edward Huang <span>黃雋翔</span></div>
+    <div class="teacher-meta">
+      <b>每週一</b> 中午 12:40 ｜ 大城國小<br>
+      UCLA 碩士 · YOUNGO / UNFCCC · EECI 青年教練
+    </div>
+  </div>
+</div>
+
+<!-- Mode Toggle -->
+<div class="mode-wrap">
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setMode('fc')">🃏 閃示卡</button>
+    <button class="mode-btn" onclick="setMode('qz')">✏️ 測驗</button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="content">
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <span>僅顯示今日待複習</span>
+    <label class="toggle">
+      <input type="checkbox" id="dueOnly" onchange="initSession()">
+      <span class="sl"></span>
+    </label>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>
+    <div class="progress-text" id="pText">0 / 0</div>
+  </div>
+
+  <!-- Flashcard Mode -->
+  <div id="fcMode">
+    <div class="card-scene" onclick="flipCard()">
+      <div class="card" id="theCard">
+        <!-- Front -->
+        <div class="card-face card-front">
+          <div class="card-hint">點擊翻轉 · Tap to flip</div>
+          <div class="card-word" id="cWord"></div>
+          <div class="card-pos" id="cPos"></div>
+          <div class="card-sdg" id="cSdg"></div>
+        </div>
+        <!-- Back -->
+        <div class="card-face card-back">
+          <div class="card-zh" id="cZh"></div>
+          <div class="card-word-b" id="cWordB"></div>
+          <div class="card-ex" id="cEx"></div>
+          <div class="card-ex-zh" id="cExZh"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating Buttons -->
+    <div class="rating-btns" id="ratingBtns">
+      <button class="r-btn again" onclick="rateCard(0)">不記得<div class="d" id="dAgain">1天後</div></button>
+      <button class="r-btn hard"  onclick="rateCard(1)">有點難<div class="d" id="dHard">–</div></button>
+      <button class="r-btn good"  onclick="rateCard(2)">記住了<div class="d" id="dGood">–</div></button>
+      <button class="r-btn easy"  onclick="rateCard(3)">很簡單<div class="d" id="dEasy">–</div></button>
+    </div>
+
+    <!-- Nav Buttons -->
+    <div class="nav-btns" id="navBtns">
+      <button class="nav-btn" onclick="skipCard()">跳過 →</button>
+      <button class="nav-btn primary" onclick="flipCard()">翻牌看答案</button>
+    </div>
+  </div>
+
+  <!-- Quiz Mode -->
+  <div id="qzMode" style="display:none;">
+    <div class="qz-card">
+      <div class="q-zh" id="qZh"></div>
+      <div class="q-ex" id="qEx"></div>
+      <div class="q-opts" id="qOpts"></div>
+    </div>
+    <div class="result-banner" id="rBanner"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQ()">下一題 →</button>
+  </div>
+
+  <!-- Done -->
+  <div class="done-card" id="doneEl">
+    <div class="done-emoji" id="dEmoji">🎉</div>
+    <div class="done-title" id="dTitle">本輪完成！</div>
+    <div class="done-score" id="dScore">–</div>
+    <div class="done-msg" id="dMsg"></div>
+    <div class="done-again">
+      <button class="nav-btn primary" onclick="initSession()" style="display:inline-block;width:auto;padding:0.75rem 2rem;">再練一輪</button>
+    </div>
+  </div>
+
+  <div class="footer-reset">
+    <button class="reset-btn" onclick="resetAll()">重置學習進度</button>
+  </div>
+
+</div>
+
+<script>
+const TODAY = new Date().toISOString().split('T')[0];
+
+// ── Vocabulary Data ──────────────────────────────────────────────────
+// To add new words: append a new object to the VOCAB array below.
+// Fields: id (unique, no spaces), word, pos, zh, ex, exZh, sdg (optional SDG goal number)
+const VOCAB = [
+  // ── Community & Society ──────────────────────────
+  {id:"community",      word:"Community",      pos:"n. 名詞",           zh:"社區",           ex:"We help each other in our community.",                      exZh:"我們在社區裡互相幫助。",                          sdg:[11]},
+  {id:"support",        word:"Support",        pos:"v./n. 動詞／名詞",  zh:"支持／幫助",     ex:"Friends support each other when things are hard.",          exZh:"朋友在困難時互相支持。",                          sdg:[1,17]},
+  {id:"resources",      word:"Resources",      pos:"n. 名詞",           zh:"資源",           ex:"Water and sunlight are important resources for life.",      exZh:"水和陽光是生命重要的資源。",                      sdg:[12]},
+  {id:"equal",          word:"Equal",          pos:"adj. 形容詞",       zh:"平等的",         ex:"Every child has an equal right to learn.",                  exZh:"每個孩子都有平等的學習權利。",                    sdg:[4,10]},
+  {id:"protect",        word:"Protect",        pos:"v. 動詞",           zh:"保護",           ex:"We must protect the ocean from pollution.",                 exZh:"我們必須保護海洋，不讓它受到污染。",              sdg:[14,15]},
+  {id:"library",        word:"Library",        pos:"n. 名詞",           zh:"圖書館",         ex:"I read books at the library every week.",                   exZh:"我每週都到圖書館看書。",                          sdg:[4]},
+  {id:"cook",           word:"Cook",           pos:"v./n. 動詞／名詞",  zh:"煮飯／廚師",     ex:"My mom cooks healthy food for our family.",                 exZh:"我媽媽為家人煮健康的食物。",                      sdg:[2]},
+  {id:"river",          word:"River",          pos:"n. 名詞",           zh:"河流",           ex:"The river is clean and full of fish.",                      exZh:"這條河很乾淨，裡面有很多魚。",                    sdg:[6]},
+  // ── Energy & Economy ────────────────────────────
+  {id:"energy",         word:"Energy",         pos:"n. 名詞",           zh:"能源",           ex:"Solar energy comes from the sun and is clean.",             exZh:"太陽能來自太陽，是乾淨的能源。",                  sdg:[7]},
+  {id:"sun",            word:"Sun",            pos:"n. 名詞",           zh:"太陽",           ex:"The sun gives us light and energy every day.",              exZh:"太陽每天給我們光和能源。",                        sdg:[7]},
+  {id:"work",           word:"Work",           pos:"v./n. 動詞／名詞",  zh:"工作",           ex:"People work hard to make their families happy.",            exZh:"人們努力工作，讓家人過得幸福。",                  sdg:[8]},
+  {id:"money",          word:"Money",          pos:"n. 名詞",           zh:"錢",             ex:"We use money to buy food, books, and clothes.",             exZh:"我們用錢買食物、書和衣服。",                      sdg:[1,8]},
+  {id:"help",           word:"Help",           pos:"v./n. 動詞／名詞",  zh:"幫助",           ex:"I help my classmates when they have problems.",             exZh:"當同學遇到問題時，我會幫助他們。",                sdg:[1,17]},
+  {id:"build",          word:"Build",          pos:"v. 動詞",           zh:"建造",           ex:"We can build a better world together.",                     exZh:"我們可以一起建造更好的世界。",                    sdg:[9,11]},
+  {id:"factory",        word:"Factory",        pos:"n. 名詞",           zh:"工廠",           ex:"The factory makes shoes and clothes for people.",           exZh:"這間工廠為人們製造鞋子和衣服。",                  sdg:[8,9]},
+  {id:"job",            word:"Job",            pos:"n. 名詞",           zh:"職業",           ex:"A teacher is a very important job in society.",             exZh:"教師是社會上非常重要的職業。",                    sdg:[8]},
+  {id:"chance",         word:"Chance",         pos:"n. 名詞",           zh:"機會",           ex:"Every child should have a chance to go to school.",         exZh:"每個孩子都應該有上學的機會。",                    sdg:[4,10]},
+  {id:"transportation", word:"Transportation", pos:"n. 名詞",           zh:"交通／大眾運輸", ex:"Buses and trains are public transportation.",               exZh:"公車和火車是大眾運輸工具。",                      sdg:[11]},
+  // ── Environment & Climate ───────────────────────
+  {id:"consume",        word:"Consume",        pos:"v. 動詞",           zh:"消費",           ex:"We consume less energy by turning off the lights.",         exZh:"我們關燈可以減少能源的消費。",                    sdg:[12]},
+  {id:"reduce",         word:"Reduce",         pos:"v. 動詞",           zh:"減少",           ex:"We can reduce waste by using less plastic.",                exZh:"我們可以少用塑膠來減少垃圾。",                    sdg:[12]},
+  {id:"reuse",          word:"Reuse",          pos:"v. 動詞",           zh:"重複使用",       ex:"I reuse my water bottle every day to save plastic.",        exZh:"我每天重複使用水壺，以節省塑膠。",                sdg:[12]},
+  {id:"recycle",        word:"Recycle",        pos:"v. 動詞",           zh:"回收",           ex:"Please recycle paper, plastic, and glass.",                 exZh:"請回收紙、塑膠和玻璃。",                          sdg:[12]},
+  {id:"waste",          word:"Waste",          pos:"v./n. 動詞／名詞",  zh:"浪費／垃圾",     ex:"Don't waste water — every drop counts!",                   exZh:"不要浪費水，每一滴都很珍貴！",                    sdg:[12]},
+  {id:"climate_change", word:"Climate Change", pos:"phr. 片語",         zh:"氣候變遷",       ex:"Climate change makes the weather hotter every year.",       exZh:"氣候變遷讓天氣每年都變得更熱。",                  sdg:[13]},
+  {id:"pollution",      word:"Pollution",      pos:"n. 名詞",           zh:"污染",           ex:"Pollution makes the air and water dirty and unsafe.",       exZh:"污染讓空氣和水變得骯髒，不安全。",                sdg:[6,14,15]},
+  {id:"ocean",          word:"Ocean",          pos:"n. 名詞",           zh:"海洋",           ex:"The ocean is home to millions of animals.",                 exZh:"海洋是數百萬種動物的家。",                        sdg:[14]},
+  {id:"sea_animals",    word:"Sea Animals",    pos:"phr. 片語",         zh:"海洋動物",       ex:"Sea animals like fish and dolphins live in the ocean.",     exZh:"魚和海豚等海洋動物住在海裡。",                    sdg:[14]},
+  {id:"weather",        word:"Weather",        pos:"n. 名詞",           zh:"天氣",           ex:"The weather today is sunny and warm.",                      exZh:"今天的天氣晴朗又溫暖。",                          sdg:[13]},
+  {id:"nature",         word:"Nature",         pos:"n. 名詞",           zh:"大自然",         ex:"We must take care of nature to keep our planet healthy.",   exZh:"我們必須愛護大自然，讓地球保持健康。",            sdg:[15]},
+  {id:"wild",           word:"Wild",           pos:"adj. 形容詞",       zh:"野生的",         ex:"Tigers and elephants are wild animals.",                    exZh:"老虎和大象是野生動物。",                          sdg:[15]},
+  // ── Justice & Partnership ───────────────────────
+  {id:"justice",        word:"Justice",        pos:"n. 名詞",           zh:"正義／公平",     ex:"Justice means everyone is treated fairly and with respect.",exZh:"正義是指每個人都受到公平且有尊嚴的對待。",        sdg:[16]},
+  {id:"law",            word:"Law",            pos:"n. 名詞",           zh:"法律",           ex:"The law protects our rights and keeps us safe.",            exZh:"法律保護我們的權利，讓我們平安。",                sdg:[16]},
+  {id:"respect",        word:"Respect",        pos:"v./n. 動詞／名詞",  zh:"尊重",           ex:"We should respect our teachers, classmates, and nature.",   exZh:"我們應該尊重老師、同學和大自然。",                sdg:[16]},
+  {id:"cooperate",      word:"Cooperate",      pos:"v. 動詞",           zh:"合作",           ex:"We cooperate to finish the group project on time.",         exZh:"我們合作，準時完成小組專題。",                    sdg:[17]},
+  {id:"partnership",    word:"Partnership",    pos:"n. 名詞",           zh:"夥伴關係",       ex:"A good partnership helps us achieve more together.",        exZh:"良好的夥伴關係幫助我們一起達成更多目標。",        sdg:[17]},
+  {id:"communicate",    word:"Communicate",    pos:"v. 動詞",           zh:"溝通",           ex:"We communicate by talking, listening, and sharing ideas.",  exZh:"我們透過說話、傾聽和分享想法來溝通。",            sdg:[17]},
+  {id:"work_together",  word:"Work Together",  pos:"phr. 片語",         zh:"一起合作",       ex:"We work together to clean our school and community.",       exZh:"我們一起合作打掃學校和社區。",                    sdg:[17]},
+  {id:"connect",        word:"Connect",        pos:"v. 動詞",           zh:"連結",           ex:"The internet helps us connect with people around the world.",exZh:"網路幫助我們與世界各地的人連結。",                sdg:[17]},
+];
+
+// ── SDG Color Map ────────────────────────────────────────────────────
+const SDG_COLORS = {
+  1:"#E5243B",2:"#DDA63A",3:"#4C9F38",4:"#C5192D",5:"#FF3A21",
+  6:"#26BDE2",7:"#FCC30B",8:"#A21942",9:"#FD6925",10:"#DD1367",
+  11:"#FD9D24",12:"#BF8B2E",13:"#3F7E44",14:"#0A97D9",15:"#56C02B",
+  16:"#00689D",17:"#19486A"
+};
+const SDG_NAMES = {
+  1:"SDG 1",2:"SDG 2",3:"SDG 3",4:"SDG 4",5:"SDG 5",
+  6:"SDG 6",7:"SDG 7",8:"SDG 8",9:"SDG 9",10:"SDG 10",
+  11:"SDG 11",12:"SDG 12",13:"SDG 13",14:"SDG 14",15:"SDG 15",
+  16:"SDG 16",17:"SDG 17"
+};
+
+function sdgTags(nums) {
+  if (!nums || !nums.length) return '';
+  return nums.map(n => `<span class="sdg-tag" style="background:${SDG_COLORS[n]}">${SDG_NAMES[n]}</span>`).join('');
+}
+
+// ── Spaced Repetition Storage ────────────────────────────────────────
+function getP() { try { return JSON.parse(localStorage.getItem('edsdg') || '{}'); } catch(e) { return {}; } }
+function saveP(p) { localStorage.setItem('edsdg', JSON.stringify(p)); }
+
+function getCard(id) {
+  return getP()[id] || { interval: 0, rep: 0, ef: 2.5, due: TODAY };
+}
+
+function rateAndSave(id, q) {
+  const p = getP();
+  let c = p[id] || { interval: 0, rep: 0, ef: 2.5, due: TODAY };
+  let { interval, rep, ef } = c;
+  if (q === 0)      { interval = 1; rep = 0; ef = Math.max(1.3, ef - 0.2); }
+  else if (q === 1) { interval = Math.max(1, Math.round(interval * 1.2)); rep++; ef = Math.max(1.3, ef - 0.15); }
+  else if (q === 2) { interval = rep === 0 ? 1 : rep === 1 ? 3 : Math.round(interval * ef); rep++; }
+  else              { interval = rep === 0 ? 4 : Math.round(interval * ef * 1.3); rep++; ef = Math.min(3.0, ef + 0.1); }
+  const due = new Date();
+  if (q > 0) due.setDate(due.getDate() + interval);
+  const dueStr = q === 0 ? TODAY : due.toISOString().split('T')[0];
+  p[id] = { interval, rep, ef, due: dueStr };
+  saveP(p);
+}
+
+function isDue(id) { return getCard(id).due <= TODAY; }
+function isMastered(id) { const c = getCard(id); return c.rep >= 4 && c.interval >= 15; }
+
+function updateStats() {
+  document.getElementById('sTot').textContent = VOCAB.length;
+  document.getElementById('sDue').textContent = VOCAB.filter(v => isDue(v.id)).length;
+  document.getElementById('sMas').textContent = VOCAB.filter(v => isMastered(v.id)).length;
+}
+
+// ── Session State ────────────────────────────────────────────────────
+let MODE = 'fc';
+let session = [], idx = 0, correct = 0, total = 0;
+let flipped = false, answered = false;
+const againSet = new Set();
+
+function initSession() {
+  const dueOnly = document.getElementById('dueOnly').checked;
+  let cards = dueOnly ? VOCAB.filter(v => isDue(v.id)) : [...VOCAB];
+  const p = getP();
+  cards.sort((a, b) => {
+    const aD = isDue(a.id), bD = isDue(b.id);
+    if (aD && !bD) return -1; if (!aD && bD) return 1;
+    const aNew = !p[a.id], bNew = !p[b.id];
+    if (aNew && !bNew) return -1; if (!aNew && bNew) return 1;
+    return 0;
+  });
+  session = cards; idx = 0; correct = 0; total = 0; flipped = false;
+  againSet.clear();
+  document.getElementById('doneEl').classList.remove('show');
+  const fcEl = document.getElementById('fcMode');
+  const qzEl = document.getElementById('qzMode');
+  if (MODE === 'fc') { fcEl.style.display = 'block'; qzEl.style.display = 'none'; }
+  else { fcEl.style.display = 'none'; qzEl.style.display = 'block'; }
+  updateStats();
+  if (session.length === 0) { showDone(true); return; }
+  MODE === 'fc' ? showFC() : showQZ();
+}
+
+// ── Flashcard ────────────────────────────────────────────────────────
+function showFC() {
+  if (idx >= session.length) { showDone(false); return; }
+  const v = session[idx];
+  document.getElementById('cWord').textContent = v.word;
+  document.getElementById('cPos').textContent = v.pos;
+  document.getElementById('cWordB').textContent = v.word;
+  document.getElementById('cZh').textContent = v.zh;
+  document.getElementById('cEx').textContent = '"' + v.ex + '"';
+  document.getElementById('cExZh').textContent = v.exZh;
+  document.getElementById('cSdg').innerHTML = sdgTags(v.sdg);
+
+  const c = getCard(v.id);
+  const hard = Math.max(1, Math.round(c.interval * 1.2));
+  const good = c.rep === 0 ? 1 : c.rep === 1 ? 3 : Math.round(c.interval * c.ef);
+  const easy = c.rep === 0 ? 4 : Math.round(c.interval * c.ef * 1.3);
+  document.getElementById('dHard').textContent = hard + '天後';
+  document.getElementById('dGood').textContent = good + '天後';
+  document.getElementById('dEasy').textContent = easy + '天後';
+
+  flipped = false;
+  document.getElementById('theCard').classList.remove('flipped');
+  document.getElementById('ratingBtns').style.display = 'none';
+  document.getElementById('navBtns').style.display = 'flex';
+  updateProgress();
+}
+
+function flipCard() {
+  flipped = !flipped;
+  document.getElementById('theCard').classList.toggle('flipped', flipped);
+  if (flipped) {
+    document.getElementById('ratingBtns').style.display = 'grid';
+    document.getElementById('navBtns').style.display = 'none';
+  }
+}
+
+function rateCard(q) {
+  const v = session[idx];
+  rateAndSave(v.id, q);
+  if (q === 0 && !againSet.has(v.id)) { session.push(v); againSet.add(v.id); }
+  total++; if (q >= 2) correct++;
+  idx++; updateStats(); showFC();
+}
+
+function skipCard() {
+  idx++; flipped = false;
+  document.getElementById('theCard').classList.remove('flipped');
+  document.getElementById('ratingBtns').style.display = 'none';
+  document.getElementById('navBtns').style.display = 'flex';
+  showFC();
+}
+
+// ── Quiz ─────────────────────────────────────────────────────────────
+function showQZ() {
+  if (idx >= session.length) { showDone(false); return; }
+  answered = false;
+  const v = session[idx];
+  document.getElementById('qZh').textContent = v.zh;
+  document.getElementById('qEx').textContent = '"' + v.ex + '"';
+
+  const others = VOCAB.filter(w => w.id !== v.id).sort(() => Math.random() - 0.5).slice(0, 3);
+  const opts = [v.word, ...others.map(w => w.word)].sort(() => Math.random() - 0.5);
+  const container = document.getElementById('qOpts');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'q-opt';
+    btn.textContent = opt;
+    btn.onclick = () => answerQZ(opt, v.word, btn);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('rBanner').className = 'result-banner';
+  document.getElementById('nextBtn').classList.remove('show');
+  updateProgress();
+}
+
+function answerQZ(sel, correct_word, el) {
+  if (answered) return;
+  answered = true;
+  const ok = sel === correct_word;
+  document.querySelectorAll('.q-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct_word) b.classList.add('correct');
+    else if (b === el && !ok) b.classList.add('wrong');
+  });
+  const banner = document.getElementById('rBanner');
+  if (ok) { banner.textContent = '✅ 答對了！Well done!'; banner.className = 'result-banner show rb-ok'; correct++; }
+  else { banner.textContent = `❌ 正確答案是「${correct_word}」`; banner.className = 'result-banner show rb-ng'; }
+  total++;
+  rateAndSave(session[idx].id, ok ? 2 : 0);
+  updateStats();
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function nextQ() { idx++; showQZ(); }
+
+// ── Progress ──────────────────────────────────────────────────────────
+function updateProgress() {
+  const pct = session.length > 0 ? (idx / session.length) * 100 : 0;
+  document.getElementById('pFill').style.width = pct + '%';
+  document.getElementById('pText').textContent = idx + ' / ' + session.length;
+}
+
+// ── Done ──────────────────────────────────────────────────────────────
+function showDone(noCards) {
+  document.getElementById('fcMode').style.display = 'none';
+  document.getElementById('qzMode').style.display = 'none';
+  const el = document.getElementById('doneEl');
+  el.classList.add('show');
+  if (noCards) {
+    document.getElementById('dEmoji').textContent = '🌟';
+    document.getElementById('dTitle').textContent = '沒有待複習的單字';
+    document.getElementById('dScore').textContent = '–';
+    document.getElementById('dMsg').textContent = '今日所有單字都已複習過了！明天再來。';
+  } else {
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    document.getElementById('dEmoji').textContent = pct >= 80 ? '🌍' : pct >= 60 ? '💪' : '📚';
+    document.getElementById('dTitle').textContent = '本輪完成！';
+    document.getElementById('dScore').textContent = pct + '%';
+    document.getElementById('dMsg').textContent = `共 ${total} 題，答對 ${correct} 題。每天練習，SDGs 英文一定越來越好！`;
+  }
+  document.getElementById('pFill').style.width = '100%';
+  document.getElementById('pText').textContent = session.length + ' / ' + session.length;
+}
+
+// ── Mode / Reset ──────────────────────────────────────────────────────
+function setMode(m) {
+  MODE = m;
+  document.querySelectorAll('.mode-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && m === 'fc') || (i === 1 && m === 'qz'));
+  });
+  initSession();
+}
+
+function resetAll() {
+  if (confirm('確定要重置所有學習進度嗎？\nAre you sure?')) {
+    localStorage.removeItem('edsdg');
+    initSession();
+  }
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────
+updateStats();
+initSession();
+</script>
+</body>
+</html>
