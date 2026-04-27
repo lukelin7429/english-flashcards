@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英文單字練習 · Luke's Flashcards</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #6366F1;
+  --primary-light: #818CF8;
+  --primary-dark: #4F46E5;
+  --bg: #F0F2FF;
+  --surface: #FFFFFF;
+  --text: #1E293B;
+  --muted: #64748B;
+  --border: #E2E8F0;
+  --again: #EF4444;
+  --hard: #F97316;
+  --good: #22C55E;
+  --easy: #3B82F6;
+  --r: 16px;
+  --shadow: 0 8px 32px rgba(99,102,241,0.13);
+}
+body {
+  font-family: 'PingFang TC','Apple LiGothic Medium','Microsoft JhengHei',-apple-system,sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, var(--primary-dark), #7C3AED);
+  color: white;
+  padding: 1.25rem 1rem 1.5rem;
+  text-align: center;
+}
+.header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.02em; }
+.header .sub { font-size: 0.78rem; opacity: 0.8; margin-top: 0.2rem; }
+.stats-bar { display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; }
+.stat { display: flex; flex-direction: column; align-items: center; }
+.stat .val { font-size: 1.3rem; font-weight: 700; line-height: 1; }
+.stat .lbl { font-size: 0.68rem; opacity: 0.75; margin-top: 0.2rem; }
+
+/* ── Mode toggle ── */
+.mode-wrap { padding: 1rem 1rem 0; max-width: 500px; margin: 0 auto; }
+.mode-toggle { display: flex; background: var(--border); border-radius: 50px; padding: 3px; }
+.mode-btn {
+  flex: 1; padding: 0.55rem 0.5rem; border: none; background: transparent;
+  border-radius: 50px; font-size: 0.88rem; font-family: inherit; cursor: pointer;
+  color: var(--muted); font-weight: 500; transition: all 0.2s;
+}
+.mode-btn.active { background: var(--surface); color: var(--primary); box-shadow: 0 2px 8px rgba(99,102,241,0.18); }
+
+/* ── Content ── */
+.content { max-width: 500px; margin: 0 auto; padding: 1rem 1rem 2.5rem; }
+
+/* ── Filter / Progress ── */
+.filter-bar { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; font-size: 0.8rem; color: var(--muted); }
+.toggle { position: relative; width: 36px; height: 20px; margin-left: auto; flex-shrink: 0; }
+.toggle input { display: none; }
+.toggle .sl { position: absolute; inset: 0; background: var(--border); border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+.toggle .sl::before { content: ''; position: absolute; width: 14px; height: 14px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.toggle input:checked + .sl { background: var(--primary); }
+.toggle input:checked + .sl::before { transform: translateX(16px); }
+.progress-wrap { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.1rem; }
+.progress-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary-light), var(--primary)); border-radius: 3px; transition: width 0.4s ease; width: 0; }
+.progress-text { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+
+/* ── Card ── */
+.card-scene { perspective: 1000px; margin-bottom: 1.1rem; cursor: pointer; user-select: none; }
+.card { width: 100%; min-height: 270px; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+.card.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute; width: 100%; min-height: 270px;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2rem;
+}
+.card-back-face { transform: rotateY(180deg); justify-content: flex-start; padding-top: 1.75rem; }
+.card-word { font-size: 2.3rem; font-weight: 700; color: var(--primary-dark); font-family: Georgia,serif; letter-spacing: 0.02em; margin-bottom: 0.5rem; }
+.card-pos { font-size: 0.75rem; color: var(--muted); background: var(--bg); padding: 0.2rem 0.75rem; border-radius: 50px; }
+.card-hint { font-size: 0.82rem; color: var(--muted); margin-top: 1.75rem; animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:0.5} 50%{opacity:1} }
+.card-word-sm { font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); font-family: Georgia,serif; width: 100%; text-align: center; margin-bottom: 0.5rem; }
+.card-zh { font-size: 1.65rem; font-weight: 700; color: var(--text); text-align: center; width: 100%; margin-bottom: 0.75rem; }
+.card-divider { width: 36px; height: 2px; background: var(--border); margin: 0 auto 0.85rem; }
+.card-ex { font-size: 0.88rem; color: var(--muted); font-style: italic; text-align: center; width: 100%; line-height: 1.55; margin-bottom: 0.35rem; font-family: Georgia,serif; }
+.card-ex-zh { font-size: 0.82rem; color: var(--muted); text-align: center; width: 100%; line-height: 1.5; }
+.card-src { margin-top: 0.85rem; font-size: 0.7rem; color: var(--primary-light); background: rgba(99,102,241,0.08); padding: 0.2rem 0.65rem; border-radius: 50px; }
+
+/* ── Rating buttons ── */
+.rating-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; margin-bottom: 0.9rem; }
+.r-btn {
+  padding: 0.65rem 0.25rem; border: none; border-radius: 12px; color: white;
+  font-family: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 0.15rem;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.r-btn:hover { transform: translateY(-2px); opacity: 0.9; }
+.r-btn:active { transform: translateY(0); }
+.r-btn .days { font-size: 0.65rem; font-weight: 400; opacity: 0.85; }
+.ra { background: var(--again); }
+.rh { background: var(--hard); }
+.rg { background: var(--good); }
+.re { background: var(--easy); }
+.nav-btns { display: flex; justify-content: center; }
+.nav-btn { padding: 0.5rem 1.5rem; border: 1.5px solid var(--border); background: var(--surface); border-radius: 50px; font-size: 0.82rem; font-family: inherit; cursor: pointer; color: var(--muted); transition: all 0.2s; }
+.nav-btn:hover { border-color: var(--primary-light); color: var(--primary); }
+
+/* ── Quiz ── */
+.quiz-q { background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow); padding: 2rem; margin-bottom: 1.1rem; text-align: center; }
+.quiz-lbl { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.75rem; }
+.quiz-zh { font-size: 1.75rem; font-weight: 700; color: var(--text); margin-bottom: 0.75rem; }
+.quiz-ex { font-size: 0.85rem; color: var(--muted); font-style: italic; font-family: Georgia,serif; line-height: 1.5; }
+.quiz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 1rem; }
+.q-opt {
+  padding: 1rem 0.6rem; border: 2px solid var(--border); background: var(--surface);
+  border-radius: 12px; font-size: 0.95rem; font-family: Georgia,serif; font-weight: 600;
+  cursor: pointer; color: var(--text); transition: all 0.15s; text-align: center;
+}
+.q-opt:hover:not(:disabled) { border-color: var(--primary-light); background: rgba(99,102,241,0.05); }
+.q-opt.correct { border-color: var(--good) !important; background: rgba(34,197,94,0.1); color: #15803D; }
+.q-opt.wrong { border-color: var(--again) !important; background: rgba(239,68,68,0.1); color: #B91C1C; }
+.q-opt:disabled { cursor: default; }
+.result-banner { padding: 0.7rem; border-radius: 10px; text-align: center; font-weight: 600; font-size: 0.88rem; margin-bottom: 0.75rem; display: none; }
+.result-banner.show { display: block; }
+.rb-ok { background: rgba(34,197,94,0.12); color: #15803D; }
+.rb-ng { background: rgba(239,68,68,0.1); color: #B91C1C; }
+.next-btn { width: 100%; padding: 0.85rem; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 0.95rem; font-family: inherit; font-weight: 600; cursor: pointer; display: none; transition: background 0.2s; }
+.next-btn.show { display: block; }
+.next-btn:hover { background: var(--primary-dark); }
+
+/* ── Session complete ── */
+.done { background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow); padding: 2.5rem; text-align: center; display: none; }
+.done.show { display: block; }
+.done .emoji { font-size: 3rem; margin-bottom: 0.75rem; }
+.done h2 { font-size: 1.2rem; margin-bottom: 0.35rem; }
+.done .score { font-size: 2.8rem; font-weight: 700; color: var(--primary); margin: 0.5rem 0; }
+.done p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; margin-bottom: 1.5rem; }
+.done-btns { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+.btn-restart { padding: 0.7rem 1.75rem; background: var(--primary); color: white; border: none; border-radius: 50px; font-size: 0.9rem; font-family: inherit; font-weight: 600; cursor: pointer; }
+.btn-reset { padding: 0.7rem 1.5rem; background: transparent; color: var(--muted); border: 1.5px solid var(--border); border-radius: 50px; font-size: 0.9rem; font-family: inherit; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎯 英文單字練習</h1>
+  <div class="sub">English Flashcards · Luke's Vocabulary</div>
+  <div class="stats-bar">
+    <div class="stat"><span class="val" id="sTot">0</span><span class="lbl">總詞彙</span></div>
+    <div class="stat"><span class="val" id="sDue">0</span><span class="lbl">今日複習</span></div>
+    <div class="stat"><span class="val" id="sMas">0</span><span class="lbl">已掌握</span></div>
+  </div>
+</div>
+
+<div class="mode-wrap">
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setMode('fc')">📚 單字卡</button>
+    <button class="mode-btn" onclick="setMode('qz')">✏️ 測驗</button>
+  </div>
+</div>
+
+<div class="content">
+  <div class="filter-bar">
+    <span>只顯示今日複習</span>
+    <label class="toggle">
+      <input type="checkbox" id="dueOnly" onchange="initSession()">
+      <span class="sl"></span>
+    </label>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>
+    <span class="progress-text" id="pText">0 / 0</span>
+  </div>
+
+  <!-- Flashcard mode -->
+  <div id="fcMode">
+    <div class="card-scene" onclick="flipCard()">
+      <div class="card" id="theCard">
+        <div class="card-face">
+          <div class="card-word" id="cWord">—</div>
+          <div class="card-pos" id="cPos">noun</div>
+          <div class="card-hint">↕ 點擊翻轉</div>
+        </div>
+        <div class="card-face card-back-face">
+          <div class="card-word-sm" id="cWordB">—</div>
+          <div class="card-zh" id="cZh">—</div>
+          <div class="card-divider"></div>
+          <div class="card-ex" id="cEx">example</div>
+          <div class="card-ex-zh" id="cExZh">中文例句</div>
+          <div class="card-src" id="cSrc">📺 Source</div>
+        </div>
+      </div>
+    </div>
+    <div class="rating-btns" id="ratingBtns" style="display:none">
+      <button class="r-btn ra" onclick="rateCard(0)">Again<span class="days">今天再看</span></button>
+      <button class="r-btn rh" onclick="rateCard(1)">Hard<span class="days" id="dHard">明天</span></button>
+      <button class="r-btn rg" onclick="rateCard(2)">Good<span class="days" id="dGood">3天後</span></button>
+      <button class="r-btn re" onclick="rateCard(3)">Easy<span class="days" id="dEasy">7天後</span></button>
+    </div>
+    <div class="nav-btns" id="navBtns">
+      <button class="nav-btn" onclick="skipCard()">跳過 Skip →</button>
+    </div>
+  </div>
+
+  <!-- Quiz mode -->
+  <div id="qzMode" style="display:none">
+    <div class="quiz-q">
+      <div class="quiz-lbl">看中文，選出正確的英文單字</div>
+      <div class="quiz-zh" id="qZh">—</div>
+      <div class="quiz-ex" id="qEx">例句</div>
+    </div>
+    <div class="quiz-opts" id="qOpts"></div>
+    <div class="result-banner" id="rBanner"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQ()">下一題 Next →</button>
+  </div>
+
+  <!-- Done -->
+  <div class="done" id="doneEl">
+    <div class="emoji" id="dEmoji">🎉</div>
+    <h2 id="dTitle">完成！</h2>
+    <div class="score" id="dScore">—</div>
+    <p id="dMsg">繼續加油！</p>
+    <div class="done-btns">
+      <button class="btn-restart" onclick="initSession()">再練一次</button>
+      <button class="btn-reset" onclick="resetAll()">重置進度</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TODAY = new Date().toISOString().split('T')[0];
+
+const VOCAB = [
+  // ── 2026-04-17 ──────────────────────────────────────
+  {id:"pallor", word:"pallor", pos:"noun", zh:"蒼白", ex:"I can see it in the pallor of your skin.", exZh:"我能從你膚色的蒼白看出來。", src:"The Mentalist E18", date:"2026-04-17"},
+  {id:"twaddle", word:"twaddle", pos:"noun", zh:"廢話，胡言亂語", ex:"I've never heard such twaddle in my life.", exZh:"我這輩子從未聽過這種廢話。", src:"The Mentalist E18", date:"2026-04-17"},
+  {id:"hustle", word:"hustle", pos:"verb", zh:"催促；快點行動；打拼衝勁", ex:"Hustle it out. That's the way.", exZh:"快點行動！就是這樣。", src:"The Mentalist E18", date:"2026-04-17"},
+  {id:"touche", word:"touché", pos:"interjection", zh:"說得好（辯論中承認對方一點）", ex:"Clerical work, huh? Touché.", exZh:"只是文書工作？說得好。", src:"The Mentalist E18", date:"2026-04-17"},
+  {id:"clerical", word:"clerical", pos:"adjective", zh:"文書的；辦公室行政的", ex:"Meh. Clerical work.", exZh:"文書工作罷了。", src:"The Mentalist E18", date:"2026-04-17"},
+  {id:"flake", word:"flake (on someone)", pos:"phrasal verb", zh:"臨時爽約；放鴿子", ex:"I think O'Laughlin flaked on Van Pelt yesterday.", exZh:"我想歐拉克林昨天放了范佩爾鴿子。", src:"The Mentalist E18", date:"2026-04-17"},
+  {id:"fruitcake", word:"fruitcake", pos:"noun (slang)", zh:"怪人，瘋子", ex:"You need to talk to that U.F.O. fruitcake that Tim met.", exZh:"你需要跟提姆認識的那個UFO瘋子談談。", src:"The Mentalist E18", date:"2026-04-17"},
+  {id:"draft_dodger", word:"draft dodger", pos:"noun phrase", zh:"逃避兵役的人", ex:"Draft dodger who killed America.", exZh:"那個害死美國的逃避兵役者。", src:"Late Night Show", date:"2026-04-17"},
+  {id:"inexplicably", word:"inexplicably", pos:"adverb", zh:"莫名其妙地；難以解釋地", ex:"His press secretary inexplicably calls it the 'triumphal ark.'", exZh:"他的新聞秘書莫名其妙地稱它為「凱旋方舟」。", src:"Late Night Show", date:"2026-04-17"},
+  {id:"neuroplasticity", word:"neuroplasticity", pos:"noun", zh:"神經可塑性（大腦因學習而改變的能力）", ex:"The key to each of these changes is neuroplasticity.", exZh:"每個改變的關鍵在於神經可塑性。", src:"TEDxVancouver", date:"2026-04-17"},
+  {id:"cringe", word:"cringe", pos:"verb / adjective", zh:"尷尬；令人起雞皮疙瘩的", ex:"Why are you posting 20-year-old cringe content?", exZh:"你為什麼要發出20年前的尷尬內容？", src:"The Daily Show", date:"2026-04-17"},
+  {id:"diss", word:"diss", pos:"verb (slang)", zh:"貶低，批評，嗆聲", ex:"After seeing this diss track, everything changed.", exZh:"看了這首嗆聲歌曲之後，一切都改變了。", src:"The Daily Show", date:"2026-04-17"},
+  {id:"liquidate", word:"liquidate", pos:"verb", zh:"清算（資產）；清盤", ex:"Spirit Airlines may have to liquidate.", exZh:"精神航空可能被迫清算。", src:"The Daily Show", date:"2026-04-17"},
+  {id:"dibs", word:"dibs", pos:"noun (informal)", zh:"優先使用權（call dibs = 先搶先得）", ex:"Did anyone call dibs on this?", exZh:"有人預訂了這個嗎？", src:"The Daily Show", date:"2026-04-17"},
+  {id:"infrared", word:"infrared", pos:"adjective / noun", zh:"紅外線的；紅外線", ex:"Our eyes can't see infrared light.", exZh:"我們的眼睛看不到紅外光。", src:"The Mentalist", date:"2026-04-17"},
+  {id:"friggin", word:"friggin'", pos:"adjective (mild profanity)", zh:"該死的（語氣加強詞）", ex:"My face is on the friggin' billboard!", exZh:"我的臉竟然在那個該死的廣告牌上！", src:"The Mentalist E19", date:"2026-04-17"},
+  {id:"tiff", word:"tiff", pos:"noun", zh:"口角；小爭執", ex:"It was nothing — just a tiff.", exZh:"沒什麼，只是一次小口角。", src:"The Mentalist E19", date:"2026-04-17"},
+  {id:"prenup", word:"prenup", pos:"noun (informal)", zh:"婚前協議（= prenuptial agreement）", ex:"Erica Flynn signed a prenup before she got married.", exZh:"艾麗卡·弗林在結婚前簽署了婚前協議。", src:"The Mentalist E19", date:"2026-04-17"},
+  {id:"litigator", word:"litigator", pos:"noun", zh:"訴訟律師", ex:"I'm a litigator, so that was the earliest I could meet.", exZh:"我是訴訟律師，所以那是我最早能見面的時間。", src:"The Mentalist E19", date:"2026-04-17"},
+  {id:"marina", word:"marina", pos:"noun", zh:"遊艇碼頭；停船場", ex:"Your husband was murdered at the marina.", exZh:"你的丈夫在碼頭被謀殺了。", src:"The Mentalist E19", date:"2026-04-17"},
+  {id:"look_sharp", word:"look sharp", pos:"phrase", zh:"振作精神；眼神犀利；快點！", ex:"Look sharp, Lisbon. We have a visitor.", exZh:"振作一點，里斯本。我們有訪客了。", src:"The Mentalist E18", date:"2026-04-17"},
+  // ── 2026-04-20 ──────────────────────────────────────
+  {id:"talk_down", word:"talk down to", pos:"phrasal verb", zh:"用高人一等的口吻說話；頤指氣使", ex:"Don't talk down to me.", exZh:"別對我頤指氣使。", src:"The Mentalist E20", date:"2026-04-20"},
+  {id:"slam_dunk", word:"slam dunk", pos:"noun / adjective (informal)", zh:"灌籃；穩贏的事；易如反掌", ex:"SAC P.D. can handle it. It's a slam dunk.", exZh:"SAC P.D.可以處理。這簡直是穩贏的局面。", src:"The Mentalist E20", date:"2026-04-20"},
+  {id:"astute", word:"astute", pos:"adjective", zh:"精明的；敏銳的；有見地的", ex:"That's very astute, Lisbon.", exZh:"妳觀察得很敏銳，里斯本。", src:"The Mentalist E20", date:"2026-04-20"},
+  // ── 2026-04-24 ──────────────────────────────────────
+  {id:"figment", word:"figment", pos:"noun", zh:"虛構的事物；幻想（figment of imagination）", ex:"That's a convenient figment of Mr. Rome's imagination.", exZh:"這只是羅姆先生虛構出來的東西而已。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"lineup", word:"lineup", pos:"noun", zh:"陣容；排隊辨認（讓目擊者指認嫌疑人）", ex:"A store owner picked me out of a lineup.", exZh:"有一間商店的店主從一排人中指認出了我。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"punk_out", word:"punk out", pos:"phrasal verb (slang)", zh:"臨陣退縮；當懦夫；放棄", ex:"Don't punk out on me.", exZh:"別放棄我啊。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"stand_up", word:"stand-up", pos:"adjective (informal)", zh:"正直的；正派的；言行一致的", ex:"If you're such a stand-up guy, prove it.", exZh:"如果你真那麼正直，就證明吧。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"jam_up", word:"jam up", pos:"phrasal verb (slang)", zh:"給某人惹麻煩；刁難；為難", ex:"Jamming me up for this. I'm just askin'.", exZh:"又給我找麻煩了。我只是問一問而已。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"high_horse", word:"on one's high horse", pos:"idiom", zh:"擺架子；自以為是；態度高傲", ex:"Don't go getting on your high horse.", exZh:"請不要擺出一副高人一等的態度來。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"hermano", word:"hermano", pos:"noun (Spanish)", zh:"兄弟（西班牙語；美國街頭文化常見）", ex:"That's where the hermanos hang.", exZh:"因為那裡正是那些兄弟們聚會的地方。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"initiation", word:"initiation", pos:"noun", zh:"入會儀式；啟蒙；開始", ex:"Stealing a cop car — that's an initiation.", exZh:"偷警車……這才算是入會儀式啊。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"restraining_order", word:"restraining order", pos:"noun phrase", zh:"限制令（法院命令某人不得接近他人）", ex:"We had to get a restraining order!", exZh:"我們不得不申請限制令！", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"broke_off", word:"broke off", pos:"phrasal verb (past)", zh:"終止（關係）；突然停止（談話）", ex:"Eleanor broke it off six months ago.", exZh:"埃莉諾在六個月前結束了那段關係。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"concertmaster", word:"concertmaster", pos:"noun", zh:"首席小提琴手；管弦樂團首席", ex:"The concertmaster took her position on stage.", exZh:"首席小提琴手走到台上就位。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"canvass", word:"canvass", pos:"verb", zh:"走訪調查；拉票；徵求意見", ex:"We'll canvass the area for witnesses.", exZh:"我們會走訪那一帶尋找目擊者。", src:"The Mentalist E22", date:"2026-04-24"},
+  {id:"perigee", word:"perigee", pos:"noun", zh:"近地點（月球軌道距地球最近的位置）", ex:"The moon's at perigee — it looks enormous!", exZh:"月亮正在近地點，看起來超大！", src:"The Mentalist E22", date:"2026-04-24"},
+];
+
+// ── Spaced Repetition Storage ──────────────────────────
+function getP() { try { return JSON.parse(localStorage.getItem('lkfc') || '{}'); } catch(e) { return {}; } }
+function saveP(p) { localStorage.setItem('lkfc', JSON.stringify(p)); }
+
+function getCard(id) {
+  const c = getP()[id];
+  return c || { interval: 0, rep: 0, ef: 2.5, due: TODAY };
+}
+
+function rateAndSave(id, q) {
+  const p = getP();
+  let c = p[id] || { interval: 0, rep: 0, ef: 2.5, due: TODAY };
+  let { interval, rep, ef } = c;
+
+  if (q === 0) {          // Again
+    interval = 1; rep = 0; ef = Math.max(1.3, ef - 0.2);
+  } else if (q === 1) {   // Hard
+    interval = Math.max(1, Math.round(interval * 1.2));
+    rep++; ef = Math.max(1.3, ef - 0.15);
+  } else if (q === 2) {   // Good
+    interval = rep === 0 ? 1 : rep === 1 ? 3 : Math.round(interval * ef);
+    rep++;
+  } else {                // Easy
+    interval = rep === 0 ? 4 : Math.round(interval * ef * 1.3);
+    rep++; ef = Math.min(3.0, ef + 0.1);
+  }
+
+  const due = new Date();
+  if (q > 0) due.setDate(due.getDate() + interval);
+  const dueStr = q === 0 ? TODAY : due.toISOString().split('T')[0];
+
+  p[id] = { interval, rep, ef, due: dueStr };
+  saveP(p);
+}
+
+function isDue(id) { return getCard(id).due <= TODAY; }
+function isMastered(id) { const c = getCard(id); return c.rep >= 4 && c.interval >= 15; }
+
+// ── Stats ──────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('sTot').textContent = VOCAB.length;
+  document.getElementById('sDue').textContent = VOCAB.filter(v => isDue(v.id)).length;
+  document.getElementById('sMas').textContent = VOCAB.filter(v => isMastered(v.id)).length;
+}
+
+// ── Session State ──────────────────────────────────────
+let MODE = 'fc';
+let session = [], idx = 0, correct = 0, total = 0;
+let flipped = false, answered = false;
+const againSet = new Set();
+
+function initSession() {
+  const dueOnly = document.getElementById('dueOnly').checked;
+  let cards = dueOnly ? VOCAB.filter(v => isDue(v.id)) : [...VOCAB];
+
+  // Sort: due first, then new (never reviewed), then future
+  const p = getP();
+  cards.sort((a, b) => {
+    const aD = isDue(a.id), bD = isDue(b.id);
+    if (aD && !bD) return -1; if (!aD && bD) return 1;
+    const aNew = !p[a.id], bNew = !p[b.id];
+    if (aNew && !bNew) return -1; if (!aNew && bNew) return 1;
+    return 0;
+  });
+
+  session = cards; idx = 0; correct = 0; total = 0; flipped = false;
+  againSet.clear();
+  document.getElementById('doneEl').classList.remove('show');
+
+  const fcEl = document.getElementById('fcMode');
+  const qzEl = document.getElementById('qzMode');
+  if (MODE === 'fc') { fcEl.style.display = 'block'; qzEl.style.display = 'none'; }
+  else { fcEl.style.display = 'none'; qzEl.style.display = 'block'; }
+
+  updateStats();
+  if (session.length === 0) { showDone(true); return; }
+  MODE === 'fc' ? showFC() : showQZ();
+}
+
+// ── Flashcard ──────────────────────────────────────────
+function showFC() {
+  if (idx >= session.length) { showDone(false); return; }
+  const v = session[idx];
+
+  document.getElementById('cWord').textContent = v.word;
+  document.getElementById('cPos').textContent = v.pos;
+  document.getElementById('cWordB').textContent = v.word;
+  document.getElementById('cZh').textContent = v.zh;
+  document.getElementById('cEx').textContent = '“' + v.ex + '”';
+  document.getElementById('cExZh').textContent = v.exZh;
+  document.getElementById('cSrc').textContent = '📺 ' + v.src;
+
+  const c = getCard(v.id);
+  const hard = Math.max(1, Math.round(c.interval * 1.2));
+  const good = c.rep === 0 ? 1 : c.rep === 1 ? 3 : Math.round(c.interval * c.ef);
+  const easy = c.rep === 0 ? 4 : Math.round(c.interval * c.ef * 1.3);
+  document.getElementById('dHard').textContent = hard + '天後';
+  document.getElementById('dGood').textContent = good + '天後';
+  document.getElementById('dEasy').textContent = easy + '天後';
+
+  flipped = false;
+  document.getElementById('theCard').classList.remove('flipped');
+  document.getElementById('ratingBtns').style.display = 'none';
+  document.getElementById('navBtns').style.display = 'flex';
+  updateProgress();
+}
+
+function flipCard() {
+  flipped = !flipped;
+  document.getElementById('theCard').classList.toggle('flipped', flipped);
+  if (flipped) {
+    document.getElementById('ratingBtns').style.display = 'grid';
+    document.getElementById('navBtns').style.display = 'none';
+  }
+}
+
+function rateCard(q) {
+  const v = session[idx];
+  rateAndSave(v.id, q);
+  if (q === 0 && !againSet.has(v.id)) { session.push(v); againSet.add(v.id); }
+  total++; if (q >= 2) correct++;
+  idx++; updateStats(); showFC();
+}
+
+function skipCard() {
+  idx++; flipped = false;
+  document.getElementById('theCard').classList.remove('flipped');
+  document.getElementById('ratingBtns').style.display = 'none';
+  document.getElementById('navBtns').style.display = 'flex';
+  showFC();
+}
+
+// ── Quiz ───────────────────────────────────────────────
+function showQZ() {
+  if (idx >= session.length) { showDone(false); return; }
+  answered = false;
+  const v = session[idx];
+  document.getElementById('qZh').textContent = v.zh;
+  document.getElementById('qEx').textContent = '“' + v.ex + '”';
+
+  const others = VOCAB.filter(w => w.id !== v.id).sort(() => Math.random() - 0.5).slice(0, 3);
+  const opts = [v.word, ...others.map(w => w.word)].sort(() => Math.random() - 0.5);
+
+  const container = document.getElementById('qOpts');
+  container.innerHTML = '';
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'q-opt';
+    btn.textContent = opt;
+    btn.onclick = () => answerQZ(opt, v.word, btn);
+    container.appendChild(btn);
+  });
+
+  document.getElementById('rBanner').className = 'result-banner';
+  document.getElementById('nextBtn').classList.remove('show');
+  updateProgress();
+}
+
+function answerQZ(sel, correct_word, el) {
+  if (answered) return;
+  answered = true;
+  const ok = sel === correct_word;
+  document.querySelectorAll('.q-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct_word) b.classList.add('correct');
+    else if (b === el && !ok) b.classList.add('wrong');
+  });
+  const banner = document.getElementById('rBanner');
+  if (ok) { banner.textContent = '✅ 答對了！Well done!'; banner.className = 'result-banner show rb-ok'; correct++; }
+  else { banner.textContent = `❌ 正確答案是「${correct_word}」`; banner.className = 'result-banner show rb-ng'; }
+  total++;
+  rateAndSave(session[idx].id, ok ? 2 : 0);
+  updateStats();
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function nextQ() { idx++; showQZ(); }
+
+// ── Progress ───────────────────────────────────────────
+function updateProgress() {
+  const pct = session.length > 0 ? (idx / session.length) * 100 : 0;
+  document.getElementById('pFill').style.width = pct + '%';
+  document.getElementById('pText').textContent = idx + ' / ' + session.length;
+}
+
+// ── Done ───────────────────────────────────────────────
+function showDone(noCards) {
+  document.getElementById('fcMode').style.display = 'none';
+  document.getElementById('qzMode').style.display = 'none';
+  const el = document.getElementById('doneEl');
+  el.classList.add('show');
+
+  if (noCards) {
+    document.getElementById('dEmoji').textContent = '🌟';
+    document.getElementById('dTitle').textContent = '沒有待複習的單字';
+    document.getElementById('dScore').textContent = '–';
+    document.getElementById('dMsg').textContent = '今日所有單字都已複習過了！明天再來看看。';
+  } else {
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    document.getElementById('dEmoji').textContent = pct >= 80 ? '🎉' : pct >= 60 ? '💪' : '📚';
+    document.getElementById('dTitle').textContent = '本輪完成！';
+    document.getElementById('dScore').textContent = pct + '%';
+    document.getElementById('dMsg').textContent = `共 ${total} 題，答對 ${correct} 題。每天練習，英文一定越來越好！`;
+  }
+  document.getElementById('pFill').style.width = '100%';
+  document.getElementById('pText').textContent = session.length + ' / ' + session.length;
+}
+
+// ── Mode / Reset ───────────────────────────────────────
+function setMode(m) {
+  MODE = m;
+  document.querySelectorAll('.mode-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && m === 'fc') || (i === 1 && m === 'qz'));
+  });
+  initSession();
+}
+
+function resetAll() {
+  if (confirm('確定要重置所有學習進度嗎？\nAre you sure?')) {
+    localStorage.removeItem('lkfc');
+    initSession();
+  }
+}
+
+// ── Boot ───────────────────────────────────────────────
+updateStats();
+initSession();
+</script>
+</body>
+</html>
